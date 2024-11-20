@@ -3,6 +3,8 @@ from inline_markdown import (
     split_nodes_delimiter,
     extract_markdown_images,
     extract_markdown_links,
+    split_nodes_image,
+    split_nodes_link,
 )
 
 from textnode import TextNode, TextType
@@ -105,6 +107,37 @@ class TestInlineMarkdown(unittest.TestCase):
             ],
             matches,
         )
+
+    def test_split_image(self):
+        node = TextNode("Hello ![alt](url) World ![alt2](url2)", TextType.TEXT)
+        self.assertListEqual(split_nodes_image([node]), [
+            TextNode("Hello ", TextType.TEXT, None),
+            TextNode("alt", TextType.IMAGE, "url"),
+            TextNode(" World ", TextType.TEXT, None),
+            TextNode("alt2", TextType.IMAGE, "url2"),
+        ])
+
+    def test_split_link(self):
+        node = TextNode("Start [text](url) middle [text2](url2) end", TextType.TEXT)
+        self.assertListEqual(split_nodes_link([node]), [
+            TextNode("Start ", TextType.TEXT, None),
+            TextNode("text", TextType.LINK, "url"),
+            TextNode(" middle ", TextType.TEXT, None),
+            TextNode("text2", TextType.LINK, "url2"),
+            TextNode(" end", TextType.TEXT, None)
+        ])
+
+    def test_empty_alt(self):
+        node = TextNode("Test ![](url)", TextType.TEXT)
+        self.assertListEqual(split_nodes_image([node]), [
+            TextNode("Test ", TextType.TEXT, None),
+            TextNode("", TextType.IMAGE, "url")
+        ])
+
+    def test_split_image_single(self):
+        node = TextNode("![image](https://www.example.COM/IMAGE.PNG)", TextType.TEXT)
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual([TextNode("image", TextType.IMAGE, "https://www.example.COM/IMAGE.PNG")], new_nodes)
 
 
 if __name__ == "__main__":
