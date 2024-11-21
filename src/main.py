@@ -1,6 +1,6 @@
 import os
 import shutil
-from textnode import TextType, TextNode
+from generate_page import generate_page, generate_pages_recursive
 
 def remove_dir(directory):
     if os.path.exists(directory):
@@ -29,5 +29,6 @@ def main():
     remove_dir(public_dir)
     os.mkdir(public_dir)
     copy_contents(static_dir, public_dir)
+    generate_pages_recursive("./content/", "./template.html", "./public")
 
 main()
